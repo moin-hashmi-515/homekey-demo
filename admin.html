@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HomeKey — Demo CMS</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1c2b2d;background:#f7f6f0;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:20px}
+.banner{background:#b3261e;color:#fff;padding:12px 16px;font-weight:700}
+.card{background:#fff;border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+input,select{padding:10px;border:1px solid #cbd5d7;border-radius:10px;font:inherit;width:100%}
+button{cursor:pointer;background:#2e6b34;color:#fff;border:0;padding:10px 18px;border-radius:10px;font-weight:700}
+button.small{padding:6px 12px;font-size:14px}button.red{background:#b3261e}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #e5e5e5;vertical-align:top}
+.note{font-size:14px;color:#5a6b6e}a{color:#2e6b34}
+</style>
+</head>
+<body>
+<div class="banner">DEMO CMS — HomeKey Enterprises &middot; Front-end demo only</div>
+<div class="wrap">
+<h1>Agency Dashboard (Demo)</h1>
+<p class="note">This CMS is a front-end demo. Data lives in this browser's local storage only. Role switching below is UI-only — there is no real login, server, authentication, payment, or notification system. Do not enter real client data. A production site would need a backend / WordPress build.</p>
+<p><a href="index.html">&larr; Back to demo website</a></p>
+<div class="card"><h2>Enquiries received (demo)</h2>
+<div id="enqList"></div>
+<p><button onclick="clearEnq()" class="red small">Clear demo enquiries</button></p>
+</div>
+<div class="card"><h2>Listings (demo edit)</h2>
+<div id="listList"></div>
+<p><input id="newTitle" placeholder="Listing title"> <input id="newArea" placeholder="Area"> <button onclick="addListing()">Add sample listing</button></p>
+<p class="note">Changes here update the demo listings in this browser only.</p>
+</div>
+<div class="card"><h2>Role (UI-only)</h2>
+<p><select id="role" onchange="document.getElementById('roleNote').textContent='Viewing as: '+this.value+' (demo only — no permission change happens).'">
+<option>Agency Admin (demo)</option><option>Agent (demo)</option><option>Marketing (demo)</option></select></p>
+<p id="roleNote" class="note">Viewing as: Agency Admin (demo) (demo only — no permission change happens).</p>
+</div>
+</div>
+<script>
+const KEY='homekey_demo_v1';
+const DEFAULT_LISTINGS=[
+ {title:"Sample 5 Marla House",type:"House",area:"DHA"},
+ {title:"Sample 10 Marla Plot",type:"Plot",area:"Bahria Town"},
+ {title:"Sample File — Capital Smart City",type:"File",area:"Capital Smart City"},
+ {title:"Sample 1 Kanal House",type:"House",area:"Lahore Smart City"},
+ {title:"Sample 7 Marla Plot",type:"Plot",area:"DHA"},
+ {title:"Sample Commercial Plot",type:"Plot",area:"Bahria Town"}
+];
+function getData(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+function render(){
+  const d=getData();const enqs=d.enquiries||[];
+  document.getElementById('enqList').innerHTML = enqs.length ? '<table><tr><th>Name</th><th>Phone</th><th>Property</th><th>Status</th><th></th></tr>'+enqs.map((a,i)=>'<tr><td>'+(a.name||'')+'</td><td>'+(a.phone||'')+'</td><td>'+(a.property||'')+'</td><td>'+(a.status||'Pending')+'</td><td><button class="small" onclick="setStatus('+i+',\'Replied\')">Mark replied</button> <button class="small red" onclick="setStatus('+i+',\'Closed\')">Close</button></td></tr>').join('')+'</table>' : '<p>No demo enquiries yet. Submit the form on the demo website to see one here.</p>';
+  const ls=(d.listings&&d.listings.length)?d.listings:DEFAULT_LISTINGS;
+  document.getElementById('listList').innerHTML = ls.map((s,i)=>'<p>'+s.title+' — '+s.area+' <button class="small red" onclick="delListing('+i+')">Remove</button></p>').join('');
+}
+function setStatus(i,s){const d=getData();d.enquiries[i].status=s;save(d);render()}
+function clearEnq(){const d=getData();d.enquiries=[];save(d);render()}
+function addListing(){const t=document.getElementById('newTitle').value.trim(), a=document.getElementById('newArea').value.trim(); if(!t)return; const d=getData(); d.listings=(d.listings&&d.listings.length)?d.listings:DEFAULT_LISTINGS.slice(); d.listings.push({title:t,type:"House",area:a||"DHA"}); save(d); document.getElementById('newTitle').value=''; document.getElementById('newArea').value=''; render()}
+function delListing(i){const d=getData(); d.listings=(d.listings&&d.listings.length)?d.listings:DEFAULT_LISTINGS.slice(); d.listings.splice(i,1); save(d); render()}
+render();
+</script>
+</body>
+</html>
